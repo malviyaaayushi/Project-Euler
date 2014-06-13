@@ -6,8 +6,6 @@
 
 uint64_t* pandigitals;
 uint64_t* primes;
-uint64_t* prime_rec;
-uint64_t* rec;
 
 uint64_t my_index;
 uint64_t prime_size;
@@ -24,9 +22,6 @@ int isPrime(uint64_t n){
     }
     if(eligible){
         primes[my_index++] = n;
-        if(n < prime_size){
-            prime_rec[n] = 1;
-        }
     }
     return eligible;
 }
@@ -47,7 +42,7 @@ void getPandigitals(int n){
     uint64_t size = factorial(n-1), j = 0;
     uint64_t count = 0; // to keep track of the pandigitals' array size
     uint64_t mul = 1; //to switch the position of n in newly generated pandigitals
-    uint64_t temp[size];
+    uint64_t* temp = (uint64_t*) malloc(size * sizeof(uint64_t));
     // copy all the previous entires in a temporary array
     getPandigitals(n-1);
     for(j=0; j<size; j++){
@@ -60,46 +55,47 @@ void getPandigitals(int n){
         }
         mul *= 10;
     }
+    free(temp);
 }
 
-void generate_primes(int n){
+void generate_primes(uint64_t n){
+    my_index = 0;
     primes[my_index++] = 2;
     uint64_t i = 3;
-    int count = 0;
-    while(count<n){
+    while(i<=n){
         if(isPrime(i)){
-            rec[count] = 0;
-            count++;
+                // do nothing
         }
         i += 2;
     }
 }
 
 int main(){
-    int n = 9;
-    uint64_t size = factorial(n), i = 0, num = 0;
-    prime_size = pow(10, 4);
-    pandigitals = (uint64_t*) malloc(size*sizeof(uint64_t));
+    int n = 9, found=0;
+    uint64_t size = 0, i = 0, num = 0, j=0;
+    prime_size = pow(987654321, 0.5) + 1;
     primes = (uint64_t*) malloc(prime_size*sizeof(uint64_t));
-    prime_rec = (uint64_t*) malloc(prime_size*sizeof(uint64_t));
-    rec = (uint64_t*) malloc(prime_size*sizeof(uint64_t));
-
-    for(i=0; i<prime_size; i++){
-        prime_rec[i] = 0;
-        rec[i] = 0;
-    }
 
     generate_primes(prime_size);
 
-    getPandigitals(n);
+    j = 4;
+    size = factorial(j);
+    pandigitals = (uint64_t*) malloc(size*sizeof(uint64_t));
+    getPandigitals(j);
 
-    for(i=0; i<size; i++){
-        //printf("%" PRIu64 "\n", pandigitals[i]);
-        num = pandigitals[i]%10000;
-        if(!rec[num] && prime_rec[num]){
-            rec[num] = 1;
-            printf("%" PRIu64 "\n", num);
+    for(j=n; j>0 && !found; j--){
+        size = factorial(j);
+        pandigitals = (uint64_t*) malloc(size*sizeof(uint64_t));
+        getPandigitals(j);
+
+        for(i=size-1; i>0; i--){
+            if(isPrime(pandigitals[i])){
+                printf("%" PRIu64 "\n", pandigitals[i]);
+                found = 1;
+                break;
+            }
         }
+        free(pandigitals);
     }
 
     return 0;
